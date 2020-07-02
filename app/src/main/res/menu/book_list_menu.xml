@@ -6,6 +6,6 @@
        app:actionProviderClass="androidx.appcompat.widget.ShareActionProvider"
        app:showAsAction="always"/>
     <item android:id="@+id/action_advanced_search"
-        android:title="Advanced Search"
+        android:title="@string/advanced_search"
         app:showAsAction="never"/>
 </menu>

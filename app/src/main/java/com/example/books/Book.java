@@ -2,12 +2,20 @@ package com.example.books;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.widget.ImageView;
+
+import androidx.databinding.BindingAdapter;
+
+import com.squareup.picasso.Picasso;
 
 public class Book implements Parcelable {
+
+    public   String thumbnail;
     public  String id;
     public String title;
     public  String subTitle;
-    public  String[] authors;
+    public String authors;
     public  String publisher;
     public String publishedDate;
     public String description;
@@ -17,7 +25,7 @@ public class Book implements Parcelable {
         this.id = id;
         this.title = title;
         this.subTitle = subTitle;
-        this.authors = authors;
+        this.authors = TextUtils.join(", ", authors);
         this.publisher= publisher;
         this.publishedDate = publishedData;
         this.description = description;
@@ -27,7 +35,7 @@ public class Book implements Parcelable {
         id = in.readString();
         title = in.readString();
         subTitle = in.readString();
-        authors = in.createStringArray();
+        authors = in.readString();
         publisher = in.readString();
         publishedDate = in.readString();
     }
@@ -44,6 +52,19 @@ public class Book implements Parcelable {
         }
     };
 
+    public Book(String id, String title, String subTitle, String[] authors, String publishedDate, String publisher, String description,String thumbnail) {
+        this.id = id;
+        this.title = title;
+        this.subTitle = subTitle;
+        // we will use TextUtils.join method to convert our authors array to a string with
+        // a ", " as delimiter
+        this.authors = TextUtils.join(", ", authors);
+        this.publisher = publisher;
+        this.publishedDate = publishedDate;
+        this.description = description;
+        this.thumbnail = thumbnail;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -54,8 +75,27 @@ public class Book implements Parcelable {
         parcel.writeString(id);
         parcel.writeString(title);
         parcel.writeString(subTitle);
-        parcel.writeStringArray(authors);
+        parcel.writeString(authors);
         parcel.writeString(publisher);
         parcel.writeString(publishedDate);
     }
+    /**
+     * now we will create our Binding Adapter so that we can bind the image with the
+     * imageView
+     */
+
+    @BindingAdapter({"android:imageUrl"})
+    public static void loadImage(ImageView imageView, String imageUrl) {
+        /**
+         * for books who don't contain image we don't want to use Picasso
+         */
+
+        if (!imageUrl.isEmpty())
+            Picasso.get().load(imageUrl).
+                    placeholder(R.drawable.book_open).
+                    into(imageView);
+          else
+            imageView.setBackgroundResource(R.drawable.book_open);
+    }
+
 }

@@ -19,19 +19,54 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+/**
+ * this class will be our Main activity where we will show our list of books that we will call
+ * with the help of google Book API
+ */
 
+/**
+ * we implements OnQueryTextListener so that we can use our searchView widget and be able
+ * to do search from it
+ */
 public class BookListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 private ProgressBar mLoadingProgress;
-private RecyclerView rvBooks;
-        URL bookUrl;
+    /**
+     * our text view who will show up if there is an error while loading
+     * data from the Google Book APU
+     */
+    private  TextView mTvError;
+    /**
+     * now we will create our recyclerView and bind it to the recyclerView we just created in the
+     * layout, and assign it on the onCreate method
+     */
+
+ RecyclerView rvBooks;
+
 @Override
 protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        rvBooks = (RecyclerView) findViewById(R.id.rv_books);
+    /**
+     * now to use out ApiUtils class we need to first build our URL
+     * and we want to look for every books who has the word "Cooking" on it
+     * after getting the URL and the JSON text we want to show our result in our TextView
+     */
+      URL bookUrl;
+      String jsonResult;
+    //        mTvResutlt = (TextView) findViewById(R.id.tvResponse);
         mLoadingProgress = (ProgressBar) findViewById(R.id.progressBar);
+        mTvError =(TextView)findViewById(R.id.tvError);
+        rvBooks =(RecyclerView)findViewById(R.id.rv_books);
+    /**
+     * in case we get called by an intent from advanced search
+     */
         Intent intent = getIntent();
         String query = intent.getStringExtra("query");
+    LinearLayoutManager booksLayoutManager = new LinearLayoutManager(this,
+            LinearLayoutManager.VERTICAL,
+            false
+    );
+    rvBooks.setLayoutManager(booksLayoutManager);
 
         try {
         if (query == null  || query.isEmpty()) {
@@ -47,20 +82,26 @@ protected void onCreate(Bundle savedInstanceState) {
         Log.d("error", e.getMessage());
         }
 
-        //create the layoutManager for the books (linear in this case, scrolling vertically
-        LinearLayoutManager booksLayoutManager =
-        new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        rvBooks.setLayoutManager(booksLayoutManager);
+    /**
+     * we override this method to show our menu in this activity
+     *
+     * @param menu
+     * @return
+     */
 
 
         }
 @Override
 public boolean onCreateOptionsMenu(Menu menu) {
+    // we use this method to add our menu to our activity
         getMenuInflater().inflate(R.menu.book_list_menu, menu);
 final MenuItem searchItem=menu.findItem(R.id.action_search);
+    // because the MenuItemCompact.getActionView became deprecated we will use the getActionView
+    // directly from the searchItem
+    //final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setOnQueryTextListener(this);
-        //recent searches
+    // we will add the ist of query we get from our shared preference
         ArrayList<String> recentList = SpUtil.getQueryList(getApplicationContext());
         int itemNum = recentList.size();
         MenuItem recentMenu;
@@ -90,7 +131,7 @@ default:
         }
 
 
-        bookUrl = ApiUtil.buildUrl(
+        URL bookUrl= ApiUtil.buildUrl(
         (queryParams[0] == null)?"" : queryParams[0],
         (queryParams[1] == null)?"" : queryParams[1],
         (queryParams[2] == null)?"" : queryParams[2],
